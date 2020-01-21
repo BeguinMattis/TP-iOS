@@ -14,13 +14,54 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="Ls1-af-voO">
+                                <rect key="frame" x="0.0" y="44" width="375" height="593.66666666666663"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TP iOS" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dbR-ga-GzK">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="33.666666666666664"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" translatesAutoresizingMaskIntoConstraints="NO" id="g2p-Wy-dT1">
+                                        <rect key="frame" x="0.0" y="49.666666666666686" width="375" height="216"/>
+                                    </datePicker>
+                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" translatesAutoresizingMaskIntoConstraints="NO" id="h3E-eH-67g">
+                                        <rect key="frame" x="0.0" y="281.66666666666669" width="375" height="216"/>
+                                    </datePicker>
+                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="aOh-lM-UU9">
+                                        <rect key="frame" x="0.0" y="513.66666666666663" width="375" height="34"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zPM-i9-qS6">
+                                        <rect key="frame" x="0.0" y="563.66666666666663" width="375" height="30"/>
+                                        <state key="normal" title="Search"/>
+                                        <connections>
+                                            <action selector="searchAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Eem-hR-LQv"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="Ls1-af-voO" secondAttribute="trailing" id="3wd-Yu-397"/>
+                            <constraint firstItem="Ls1-af-voO" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="HDx-Tv-Tw0"/>
+                            <constraint firstItem="Ls1-af-voO" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="x4c-eb-oIX"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <connections>
+                        <outlet property="ui_currency" destination="aOh-lM-UU9" id="ljB-31-zZc"/>
+                        <outlet property="ui_endDate" destination="h3E-eH-67g" id="51n-PL-Isd"/>
+                        <outlet property="ui_startDate" destination="g2p-Wy-dT1" id="BlK-yU-CWq"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="139" y="138"/>
+            <point key="canvasLocation" x="138.40000000000001" y="137.4384236453202"/>
         </scene>
     </scenes>
 </document>
