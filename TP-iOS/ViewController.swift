@@ -10,6 +10,7 @@ import UIKit
 import Alamofire
 
 class ViewController: UIViewController {
+    private static let currentDate = Date()
     private static let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -30,34 +31,60 @@ class ViewController: UIViewController {
     }
     
     func setup() {
-        var uIDatePicker = UIDatePicker()
-        uIDatePicker.datePickerMode = UIDatePicker.Mode.date
-        uIDatePicker.addTarget(self, action: #selector(startDateValueChanged(sender:)), for: .valueChanged)
-        ui_startDate.inputView = uIDatePicker
-               
-        uIDatePicker = UIDatePicker()
-        uIDatePicker.datePickerMode = UIDatePicker.Mode.date
-        uIDatePicker.addTarget(self, action: #selector(endDateValueChanged(sender:)), for: .valueChanged)
-        ui_endDate.inputView = uIDatePicker
-        
-        let date = Date()
-        ui_startDate.text = ViewController.dateFormatter.string(from: date)
-        ui_endDate.text = ViewController.dateFormatter.string(from: date)
+        if let yesterdayDate = Calendar.current.date(byAdding: .day, value: -1, to: ViewController.currentDate) {
+            ui_startDate.inputView = generateStartDateDatePicker(date: yesterdayDate, endDate: ViewController.currentDate)
+            ui_startDate.text = ViewController.dateFormatter.string(from: yesterdayDate)
+            ui_endDate.inputView = generateEndDateDatePicker(date: ViewController.currentDate, startDate: yesterdayDate)
+            ui_endDate.text = ViewController.dateFormatter.string(from: ViewController.currentDate)
+        }
         
         ui_tableView.dataSource = self
     }
     
-    @objc func startDateValueChanged(sender: UIDatePicker) {
-        ui_startDate.text = ViewController.dateFormatter.string(from: sender.date)
+    private func generateDatePicker(date: Date) -> UIDatePicker {
+        let uIDatePicker = UIDatePicker()
+        uIDatePicker.datePickerMode = UIDatePicker.Mode.date
+        uIDatePicker.setDate(date, animated: true)
+        
+        return uIDatePicker
     }
     
-    @objc func endDateValueChanged(sender: UIDatePicker) {
-        ui_endDate.text = ViewController.dateFormatter.string(from: sender.date)
+    private func generateStartDateDatePicker(date: Date, endDate: Date) -> UIDatePicker {
+        let uIDatePicker = generateDatePicker(date: date)
+        uIDatePicker.maximumDate = endDate
+        uIDatePicker.addTarget(self, action: #selector(startDateValueChanged(sender:)), for: .valueChanged)
+        
+        return uIDatePicker
+    }
+    
+    @objc private func startDateValueChanged(sender: UIDatePicker) {
+        if let endDateString = ui_endDate.text, let endDateDate = ViewController.dateFormatter.date(from: endDateString), sender.date <= endDateDate {
+            ui_endDate.inputView = generateEndDateDatePicker(date: endDateDate, startDate: sender.date)
+            ui_startDate.inputView = generateStartDateDatePicker(date: sender.date, endDate: endDateDate)
+            ui_startDate.text = ViewController.dateFormatter.string(from: sender.date)
+        }
+    }
+    
+    private func generateEndDateDatePicker(date: Date, startDate: Date) -> UIDatePicker {
+        let uIDatePicker = generateDatePicker(date: date)
+        uIDatePicker.minimumDate = startDate
+        uIDatePicker.maximumDate = ViewController.currentDate
+        uIDatePicker.addTarget(self, action: #selector(endDateValueChanged(sender:)), for: .valueChanged)
+        
+        return uIDatePicker
+    }
+    
+    @objc private func endDateValueChanged(sender: UIDatePicker) {
+        if let startDateString = ui_startDate.text, let startDateDate = ViewController.dateFormatter.date(from: startDateString), sender.date >= startDateDate && sender.date <= ViewController.currentDate {
+            ui_startDate.inputView = generateStartDateDatePicker(date: startDateDate, endDate: sender.date)
+            ui_endDate.inputView = generateEndDateDatePicker(date: sender.date, startDate: startDateDate)
+            ui_endDate.text = ViewController.dateFormatter.string(from: sender.date)
+        }
     }
 
     @IBAction func searchAction(_ sender: Any) {
         if let selectedStartDate = ui_startDate.text, let selectedEndDate = ui_endDate.text, let selectedCurrency = ui_currency.text {
-            let url = "https://api.coindesk.com/v1/bpi/historical/\(selectedCurrency).json?start=\(selectedStartDate)&end=\(selectedEndDate)"
+            let url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=\(selectedStartDate)&end=\(selectedEndDate)&currency=\(selectedCurrency)"
             AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<Bitcoin, AFError>) in
                 switch response.result {
                 case .success(let bitcoin):
