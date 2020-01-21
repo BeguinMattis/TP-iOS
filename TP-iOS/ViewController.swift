@@ -16,9 +16,12 @@ class ViewController: UIViewController {
         return dateFormatter
     }()
     
+    var bitcoinList: [(String, Double)] = []
+    
     @IBOutlet weak var ui_startDate: UITextField!
     @IBOutlet weak var ui_endDate: UITextField!
     @IBOutlet weak var ui_currency: UITextField!
+    @IBOutlet weak var ui_tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +43,8 @@ class ViewController: UIViewController {
         let date = Date()
         ui_startDate.text = ViewController.dateFormatter.string(from: date)
         ui_endDate.text = ViewController.dateFormatter.string(from: date)
+        
+        ui_tableView.dataSource = self
     }
     
     @objc func startDateValueChanged(sender: UIDatePicker) {
@@ -53,17 +58,16 @@ class ViewController: UIViewController {
     @IBAction func searchAction(_ sender: Any) {
         if let selectedStartDate = ui_startDate.text, let selectedEndDate = ui_endDate.text, let selectedCurrency = ui_currency.text {
             let url = "https://api.coindesk.com/v1/bpi/historical/\(selectedCurrency).json?start=\(selectedStartDate)&end=\(selectedEndDate)"
-            AF.request(url, method: .get).responseDecodable { (response: DataResponse<Bitcoin, AFError>) in
+            AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<Bitcoin, AFError>) in
                 switch response.result {
                 case .success(let bitcoin):
                     if let bpi = bitcoin.bpi {
                         let sortedBpi = bpi.sorted(by: {
                             ViewController.dateFormatter.date(from: $0.key)! <  ViewController.dateFormatter.date(from: $1.key)!
                         })
-
-                        for (date, price) in sortedBpi {
-                            print("\(date): \(price)")
-                        }
+                                                
+                        self?.bitcoinList = sortedBpi
+                        self?.ui_tableView.reloadData()
                     }
                 case .failure(let error):
                     print(error.errorDescription ?? "")
@@ -71,6 +75,23 @@ class ViewController: UIViewController {
             }
         } else {
             print("Erreur")
+        }
+    }
+}
+
+extension ViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return bitcoinList.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if let dynamicCell = tableView.dequeueReusableCell(withIdentifier: "bitcoinCellID", for: indexPath) as? BitcoinTableViewCell {
+            
+            let (date, price) = bitcoinList[indexPath.row]
+            dynamicCell.fill(withDate: date, andPrice: price)
+            return dynamicCell
+        } else {
+            return UITableViewCell()
         }
     }
 }
