@@ -15,6 +15,7 @@
 		2FBAFD8423D7009D00E79856 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2FBAFD8323D7009D00E79856 /* Assets.xcassets */; };
 		2FBAFD8723D7009D00E79856 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2FBAFD8523D7009D00E79856 /* LaunchScreen.storyboard */; };
 		59B5252523D7396C00AB7064 /* BitcoinTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B5252423D7396C00AB7064 /* BitcoinTableViewCell.swift */; };
+		59B5252A23D7582900AB7064 /* Currency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59B5252923D7582900AB7064 /* Currency.swift */; };
 		81EC4B986713804C9C92EBB5 /* Pods_TP_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16D104DAB03A98D3B99DCCDB /* Pods_TP_iOS.framework */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		2FBAFD8823D7009D00E79856 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		42716E795524AC269E44DEEC /* Pods-TP-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TP-iOS.debug.xcconfig"; path = "Target Support Files/Pods-TP-iOS/Pods-TP-iOS.debug.xcconfig"; sourceTree = "<group>"; };
 		59B5252423D7396C00AB7064 /* BitcoinTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BitcoinTableViewCell.swift; sourceTree = "<group>"; };
+		59B5252923D7582900AB7064 /* Currency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currency.swift; sourceTree = "<group>"; };
 		A590CABC3EB3E6BC931CF329 /* Pods-TP-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TP-iOS.release.xcconfig"; path = "Target Support Files/Pods-TP-iOS/Pods-TP-iOS.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -50,6 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				2F740ECF23D70BA2008A9C80 /* Bitcoin.swift */,
+				59B5252923D7582900AB7064 /* Currency.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -220,6 +223,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59B5252A23D7582900AB7064 /* Currency.swift in Sources */,
 				2F740ED023D70BA2008A9C80 /* Bitcoin.swift in Sources */,
 				2FBAFD7F23D7009C00E79856 /* ViewController.swift in Sources */,
 				2FBAFD7B23D7009C00E79856 /* AppDelegate.swift in Sources */,

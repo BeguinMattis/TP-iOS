@@ -25,7 +25,7 @@ class BitcoinTableViewCell: UITableViewCell {
     
     func fill(withDate date: String, andPrice price: Double) {
         ui_dateLabel.text = date
-        ui_priceLabel.text = "\(price)€"
+        ui_priceLabel.text = "\(price)"
     }
 
 }

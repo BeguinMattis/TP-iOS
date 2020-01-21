@@ -17,6 +17,8 @@ class ViewController: UIViewController {
         return dateFormatter
     }()
     
+    var selectedCurrency: Currency?
+    var currencyList: [Currency] = []
     var bitcoinList: [(String, Double)] = []
     
     @IBOutlet weak var ui_startDate: UITextField!
@@ -37,6 +39,13 @@ class ViewController: UIViewController {
             ui_endDate.inputView = generateEndDateDatePicker(date: ViewController.currentDate, startDate: yesterdayDate)
             ui_endDate.text = ViewController.dateFormatter.string(from: ViewController.currentDate)
         }
+        
+        fetchAllCurrencies()
+        
+        let uIPickerView = UIPickerView()
+        uIPickerView.dataSource = self
+        uIPickerView.delegate = self
+        ui_currency.inputView = uIPickerView
         
         ui_tableView.dataSource = self
     }
@@ -62,6 +71,7 @@ class ViewController: UIViewController {
             ui_endDate.inputView = generateEndDateDatePicker(date: endDateDate, startDate: sender.date)
             ui_startDate.inputView = generateStartDateDatePicker(date: sender.date, endDate: endDateDate)
             ui_startDate.text = ViewController.dateFormatter.string(from: sender.date)
+            ui_startDate.resignFirstResponder()
         }
     }
     
@@ -79,11 +89,12 @@ class ViewController: UIViewController {
             ui_startDate.inputView = generateStartDateDatePicker(date: startDateDate, endDate: sender.date)
             ui_endDate.inputView = generateEndDateDatePicker(date: sender.date, startDate: startDateDate)
             ui_endDate.text = ViewController.dateFormatter.string(from: sender.date)
+            ui_endDate.resignFirstResponder()
         }
     }
 
     @IBAction func searchAction(_ sender: Any) {
-        if let selectedStartDate = ui_startDate.text, let selectedEndDate = ui_endDate.text, let selectedCurrency = ui_currency.text {
+        if let selectedStartDate = ui_startDate.text, let selectedEndDate = ui_endDate.text, let selectedCurrency = selectedCurrency?.currency {
             let url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=\(selectedStartDate)&end=\(selectedEndDate)&currency=\(selectedCurrency)"
             AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<Bitcoin, AFError>) in
                 switch response.result {
@@ -104,6 +115,18 @@ class ViewController: UIViewController {
             print("Erreur")
         }
     }
+    
+    func fetchAllCurrencies() {
+        let url = "https://api.coindesk.com/v1/bpi/supported-currencies.json"
+        AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<[Currency], AFError>) in
+            switch response.result {
+            case .success(let currencies):
+                self?.currencyList.append(contentsOf: currencies)
+            case .failure(let error):
+                print(error.errorDescription ?? "")
+            }
+        }
+    }
 }
 
 extension ViewController: UITableViewDataSource {
@@ -120,5 +143,25 @@ extension ViewController: UITableViewDataSource {
         } else {
             return UITableViewCell()
         }
+    }
+}
+
+extension ViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return currencyList.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return currencyList[row].country
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        selectedCurrency = currencyList[row]
+        ui_currency.text = currencyList[row].country
+        ui_currency.resignFirstResponder()
     }
 }
