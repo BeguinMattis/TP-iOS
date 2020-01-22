@@ -21,47 +21,115 @@ class ResultViewController: UIViewController {
     var endDate: String?
     var currency: String?
     var bitcoinList: [(String, Double)] = []
+    
+    var currenciesValues: [Double] = []
+    var currenciesDates: [String] = []
 
     @IBOutlet weak var ui_table: UITableView!
+    @IBOutlet weak var ui_chart: LineChartView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         ui_table.dataSource = self
+        ui_chart.delegate = self
         search()
     }
     
     func search() {
         if let selectedStartDate = startDate, let selectedEndDate = endDate, let selectedCurrency = currency {
-               let url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=\(selectedStartDate)&end=\(selectedEndDate)&currency=\(selectedCurrency)"
-               AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<Bitcoin, AFError>) in
-                   switch response.result {
-                   case .success(let bitcoin):
-                       if let bpi = bitcoin.bpi {
-                           let sortedBpi = bpi.sorted(by: {ResultViewController.dateFormatter.date(from: $0.key)! < ResultViewController.dateFormatter.date(from: $1.key)!
-                           })
-                                                   
-                           self?.bitcoinList = sortedBpi
-                           self?.ui_table.reloadData()
-                       }
-                   case .failure(let error):
-                       print(error.errorDescription ?? "")
+           let url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=\(selectedStartDate)&end=\(selectedEndDate)&currency=\(selectedCurrency)"
+           AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<Bitcoin, AFError>) in
+               switch response.result {
+               case .success(let bitcoin):
+                   if let bpi = bitcoin.bpi {
+                        let sortedBpi = bpi.sorted(by: {ResultViewController.dateFormatter.date(from: $0.key)! < ResultViewController.dateFormatter.date(from: $1.key)!
+                        })
+                               
+                        // Table
+                        self?.bitcoinList = sortedBpi
+                        self?.ui_table.reloadData()
+                    
+                        // Chart
+                        self?.chartDatas()
+                        self?.plotDatas()
                    }
+               case .failure(let error):
+                   print(error.errorDescription ?? "")
                }
-           } else {
-               print("Error")
            }
+       } else {
+           print("Error")
        }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
     }
-    */
+    
+    func chartDatas() {
+        currenciesValues.removeAll()
+        currenciesDates.removeAll()
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MM-dd"
+        
+        for (date, price) in bitcoinList {
+            currenciesValues.append(price)
+            currenciesDates.append(date)
+        }
+    }
+    
+    func plotDatas() {
+        var values = [ChartDataEntry]()
+        
+        for i in 0 ..< currenciesValues.count {
+            values.append(ChartDataEntry(x: Double(i), y: currenciesValues[i]))
+        }
+        
+        let gradiant = getGradiant()
+        let data = LineChartData()
+        let ds = LineChartDataSet(entries: values, label: "Bitcoin value")
+                
+        data.setDrawValues(false)
+        ds.colors = [UIColor.systemBlue]
+        ds.drawValuesEnabled = false
+        ds.drawCirclesEnabled = false
+        ds.drawFilledEnabled = true
+        ds.fill = Fill.fillWithLinearGradient(gradiant, angle: 90)
+        ds.mode = .cubicBezier
+                
+        // Basics
+        ui_chart.backgroundColor = UIColor.clear
+        ui_chart.chartDescription?.enabled = false
+        ui_chart.animate(xAxisDuration: 2.0, yAxisDuration: 2.0)
+        ui_chart.drawBordersEnabled = false
+        ui_chart.legend.enabled = false
+        
+        // XAxis
+        ui_chart.xAxis.valueFormatter = IndexAxisValueFormatter(values: currenciesDates)
+        ui_chart.xAxis.granularity = 1
+        ui_chart.xAxis.labelPosition = .bottom
+        ui_chart.xAxis.drawLabelsEnabled = currenciesValues.count < 7
+        ui_chart.xAxis.drawAxisLineEnabled = false
+        ui_chart.xAxis.drawGridLinesEnabled = false
+        
+        // RightAxis
+        ui_chart.rightAxis.enabled = false
+        
+        // LeftAxis
+        ui_chart.leftAxis.drawAxisLineEnabled = false
+        ui_chart.leftAxis.drawGridLinesEnabled = false
+    
+        data.addDataSet(ds)
+        ui_chart.data = data
+        ui_chart.notifyDataSetChanged()
+        
+    }
+    
+    func getGradiant() -> CGGradient {
+        let colors = [UIColor.systemBlue.withAlphaComponent(0.5).cgColor, UIColor.white.withAlphaComponent(0.5).cgColor] as CFArray
+        let locations = [0.7, 0.0] as [CGFloat]
+        let gradiant = CGGradient.init(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: locations)
+        
+        return gradiant!
+    }
 }
 
 extension ResultViewController: UITableViewDataSource {
@@ -78,5 +146,12 @@ extension ResultViewController: UITableViewDataSource {
         } else {
             return UITableViewCell()
         }
+    }
+}
+
+extension ResultViewController: ChartViewDelegate {
+    override func viewWillAppear(_ animated: Bool) {
+        self.chartDatas()
+        self.plotDatas()
     }
 }
