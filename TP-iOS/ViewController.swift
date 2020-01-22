@@ -19,12 +19,10 @@ class ViewController: UIViewController {
     
     var selectedCurrency: Currency?
     var currencyList: [Currency] = []
-    var bitcoinList: [(String, Double)] = []
     
     @IBOutlet weak var ui_startDate: UITextField!
     @IBOutlet weak var ui_endDate: UITextField!
     @IBOutlet weak var ui_currency: UITextField!
-    @IBOutlet weak var ui_tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,13 +39,10 @@ class ViewController: UIViewController {
         }
         
         fetchAllCurrencies()
-        
         let uIPickerView = UIPickerView()
-        uIPickerView.dataSource = self
         uIPickerView.delegate = self
+        uIPickerView.dataSource = self
         ui_currency.inputView = uIPickerView
-        
-        ui_tableView.dataSource = self
     }
     
     private func generateDatePicker(date: Date) -> UIDatePicker {
@@ -92,29 +87,6 @@ class ViewController: UIViewController {
             ui_endDate.resignFirstResponder()
         }
     }
-
-    @IBAction func searchAction(_ sender: Any) {
-        if let selectedStartDate = ui_startDate.text, let selectedEndDate = ui_endDate.text, let selectedCurrency = selectedCurrency?.currency {
-            let url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=\(selectedStartDate)&end=\(selectedEndDate)&currency=\(selectedCurrency)"
-            AF.request(url, method: .get).responseDecodable { [weak self] (response: DataResponse<Bitcoin, AFError>) in
-                switch response.result {
-                case .success(let bitcoin):
-                    if let bpi = bitcoin.bpi {
-                        let sortedBpi = bpi.sorted(by: {
-                            ViewController.dateFormatter.date(from: $0.key)! <  ViewController.dateFormatter.date(from: $1.key)!
-                        })
-                                                
-                        self?.bitcoinList = sortedBpi
-                        self?.ui_tableView.reloadData()
-                    }
-                case .failure(let error):
-                    print(error.errorDescription ?? "")
-                }
-            }
-        } else {
-            print("Erreur")
-        }
-    }
     
     func fetchAllCurrencies() {
         let url = "https://api.coindesk.com/v1/bpi/supported-currencies.json"
@@ -127,23 +99,18 @@ class ViewController: UIViewController {
             }
         }
     }
-}
-
-extension ViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return bitcoinList.count
-    }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let dynamicCell = tableView.dequeueReusableCell(withIdentifier: "bitcoinCellID", for: indexPath) as? BitcoinTableViewCell {
-            
-            let (date, price) = bitcoinList[indexPath.row]
-            dynamicCell.fill(withDate: date, andPrice: price)
-            return dynamicCell
-        } else {
-            return UITableViewCell()
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "segue-result" {
+            if let startDate = ui_startDate.text, let endDate = ui_endDate.text, let currency = selectedCurrency?.currency, let resultViewController: ResultViewController = segue.destination as? ResultViewController {
+                resultViewController.startDate = startDate
+                resultViewController.endDate = endDate
+                resultViewController.currency = currency
+            }
         }
     }
+    
+    @IBAction func returnHome(_ segue: UIStoryboardSegue) {}
 }
 
 extension ViewController: UIPickerViewDelegate, UIPickerViewDataSource {
