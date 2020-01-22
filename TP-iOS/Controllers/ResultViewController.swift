@@ -24,6 +24,7 @@ class ResultViewController: UIViewController {
     
     var currenciesValues: [Double] = []
     var currenciesDates: [String] = []
+    var selectedCell: UITableViewCell?
 
     @IBOutlet weak var ui_table: UITableView!
     @IBOutlet weak var ui_chart: LineChartView!
@@ -32,6 +33,7 @@ class ResultViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         ui_table.dataSource = self
+        ui_table.delegate = self
         ui_chart.delegate = self
         search()
     }
@@ -132,7 +134,7 @@ class ResultViewController: UIViewController {
     }
 }
 
-extension ResultViewController: UITableViewDataSource {
+extension ResultViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return bitcoinList.count
     }
@@ -147,11 +149,27 @@ extension ResultViewController: UITableViewDataSource {
             return UITableViewCell()
         }
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print(indexPath.row)
+        
+        // TODO: Highlight in chart
+    }
 }
 
 extension ResultViewController: ChartViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         self.chartDatas()
         self.plotDatas()
+    }
+    
+    func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
+        if let index = ui_chart.data?.dataSets[highlight.dataSetIndex].entryIndex(entry: entry) {
+            selectedCell?.backgroundColor = UIColor.clear
+            let indexPath = IndexPath(row: index, section: 0)
+            selectedCell = ui_table.cellForRow(at: indexPath)
+            ui_table.scrollToRow(at: indexPath, at: .middle, animated: false)
+            selectedCell?.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.2)
+        }
     }
 }
